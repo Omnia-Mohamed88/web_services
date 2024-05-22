@@ -1,0 +1,194 @@
+openapi: 3.0.1
+info:
+  title: MyAPI
+  description: API for managing users and their posts
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+paths:
+  /members:
+    get:
+      summary: Retrieve all members
+      responses:
+        '200':
+          description: Array of all members
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+    post:
+      summary: Add a new member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMember'
+      responses:
+        '201':
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+  /members/{memberId}:
+    get:
+      summary: Retrieve member by ID
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Member information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '404':
+          description: Member not found
+  /members/{memberId}/articles:
+    get:
+      summary: Retrieve articles by member
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of member's articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+        '404':
+          description: Member not found
+    post:
+      summary: Add an article for a member
+      parameters:
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewArticle'
+      responses:
+        '201':
+          description: Article added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+  /articles/{articleId}:
+    delete:
+      summary: Remove an article
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Article deleted
+        '404':
+          description: Article not found
+    patch:
+      summary: Partially update an article
+      parameters:
+        - name: articleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateArticle'
+      responses:
+        '200':
+          description: Article updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article not found
+components:
+  schemas:
+    Member:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+    NewMember:
+      type: object
+      required:
+        - username
+        - email
+        - id
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        id:
+          type: integer
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+        memberId:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+    NewArticle:
+      type: object
+      required:
+        - title
+        - body
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+    UpdateArticle:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    basicAuthentication:
+      type: http
+      scheme: basic
+security:
+  - jwtAuth: []
+  - basicAuthentication: []
